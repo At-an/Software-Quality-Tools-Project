@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
+from flask import Blueprint, render_template
+from flask import request, flash, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from .models import Post, User, Comment, Like
 from . import db
@@ -39,14 +40,13 @@ def delete_post(id):
 
     if not post:
         flash("Post does not exist.", category='error')
-    elif current_user.id != post.author:  # Correctly check if the current user is the author
-        flash('You do not have permission to delete this post.', category='error')
+    elif current_user.id != post.author:flash('You do not have permission to delete this post.', category='error')
     else:
         db.session.delete(post)
         db.session.commit()
         flash('Post deleted.', category='success')
-
     return redirect(url_for('views.home'))
+
 
 @views.route("/posts/<username>")
 @login_required
