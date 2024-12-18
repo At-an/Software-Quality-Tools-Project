@@ -12,7 +12,7 @@ pipeline {
                     $class: 'GitSCM', 
                     branches: [[name: '*/main']], 
                     extensions: [[$class: 'CleanCheckout']], 
-                    userRemoteConfigs: [[credentialsId: 'your-credential-id', url: 'https://github.com/At-an/Software-Quality-Tools-Project.git']]
+                    userRemoteConfigs: [[credentialsId: 'ange', url: 'https://github.com/At-an/Software-Quality-Tools-Project.git']]
                 ])
             }
         }
