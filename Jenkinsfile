@@ -6,7 +6,7 @@ pipeline {
     }
     
     environment {
-        PYTHON_VERSION = '3.12.5"
+        PYTHON_VERSION = "3.12.5"
         PYTHON_EXE = "C:\\Users\\ANGE\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
     }
     
