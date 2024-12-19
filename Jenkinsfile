@@ -1,5 +1,9 @@
 pipeline {
     agent any
+
+    tools {
+        git "Default"
+    }
     
     environment {
         PYTHON_VERSION = '3.12.5'
