@@ -122,9 +122,15 @@ pipeline {
         success {
             echo 'Integration tests completed successfully!'
             archiveArtifacts artifacts: 'requirements.txt', fingerprint: true
+            mail to: 'natanahelatankeu@gmail.com',
+            subject: 'Integration Tests Successful',
+            body: 'Integration tests have completed successfully.'
         }
         failure {
             echo 'Integration tests failed!'
+            mail to: 'natanahelatankeu@gmail.com',
+            subject: 'Integration Tests Failed',
+            body: 'Integration tests have failed. Please check the logs for more information.'
         }
         cleanup {
             cleanWs()
