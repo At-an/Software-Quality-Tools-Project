@@ -1,8 +1,13 @@
 pipeline {
     agent any
+
+    tools {
+        git "Git(Default)"
+    }
     
     environment {
-        PYTHON_VERSION = '3.12.5'
+        PYTHON_VERSION = "3.12.5"
+        PYTHON_EXE = "C:\\Users\\ANGE\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
     }
     
     stages {
@@ -21,7 +26,7 @@ pipeline {
             steps {
                 script {
                     bat """
-                        python%PYTHON_VERSION% -m pip install --user ^
+                        ${PYTHON_EXE} -m pip install --user ^
                             bcrypt==4.2.1 ^
                             blinker==1.9.0 ^
                             click==8.1.7 ^
@@ -58,9 +63,11 @@ pipeline {
         stage('Code Quality Check') {
             steps {
                 script {
+                    dir('C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\Integration_test'){
                     bat """
-                        python%PYTHON_VERSION% -m flake8 . --max-line-length=120
+                        ${PYTHON_EXE} -m flake8 . --max-line-length=120
                     """
+                    }
                 }
             }
         }
@@ -74,7 +81,7 @@ pipeline {
                         mkdir coverage-reports
                         
                         REM Run tests with coverage
-                        python%PYTHON_VERSION% -m pytest tests\\ ^
+                        ${PYTHON_EXE} -m pytest tests\\ ^
                             --verbose ^
                             --junitxml=test-results\\junit.xml ^
                             --cov=. ^
@@ -89,7 +96,7 @@ pipeline {
             steps {
                 script {
                     bat """
-                        python%PYTHON_VERSION% -m pip freeze > requirements.txt
+                        ${PYTHON_EXE} -m pip freeze > requirements.txt
                     """
                 }
             }
@@ -98,7 +105,8 @@ pipeline {
     
     post {
         always {
-            junit 'test-results/junit.xml'
+            sh 'ls -l **/TEST-*.xml'
+            junit '**/TEST-*.xml'
             recordIssues enabledForFailure: true, tool: flake8()
             publishCoverage adapters: [coberturaAdapter('coverage-reports/coverage.xml')]
             publishHTML([
