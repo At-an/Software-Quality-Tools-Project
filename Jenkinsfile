@@ -106,7 +106,7 @@ pipeline {
     post {
         always {
             bat 'powershell -Command "Get-ChildItem -Path . -Filter TEST-*.xml -Recurse | Format-Table"'
-            junit '**/TEST-*.xml'
+            junit '**/test-results/*.xml'
             recordIssues enabledForFailure: true, tool: flake8()
             publishCoverage adapters: [coberturaAdapter('coverage-reports/coverage.xml')]
             publishHTML([
