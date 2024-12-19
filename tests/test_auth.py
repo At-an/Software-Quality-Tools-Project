@@ -25,7 +25,7 @@ def test_login_success(client):
 
 def test_login(client, create_user):
     """Test login with valid credentials."""
-    user = create_user(
+    create_user(
         email="test@example.com", username="testuser", password="password123"
     )
     response = client.post(
@@ -40,7 +40,7 @@ def test_login(client, create_user):
 
 def test_login_invalid_password(client, create_user):
     """Test login with invalid password."""
-    user = create_user(
+    create_user(
         email="test@example.com", username="testuser", password="password123"
     )
     response = client.post(
@@ -56,7 +56,7 @@ def test_login_invalid_password(client, create_user):
 
 def test_logout(client, create_user):
     """Test logout."""
-    user = create_user(
+    create_user(
         email="test@example.com", username="testuser", password="password123"
     )
     client.post(
