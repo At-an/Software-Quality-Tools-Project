@@ -105,7 +105,7 @@ pipeline {
     
     post {
         always {
-            sh 'ls -l **/TEST-*.xml'
+            powershell -Command "ls -l **/TEST-*.xml"
             junit '**/TEST-*.xml'
             recordIssues enabledForFailure: true, tool: flake8()
             publishCoverage adapters: [coberturaAdapter('coverage-reports/coverage.xml')]
