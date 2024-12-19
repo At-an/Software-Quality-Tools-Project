@@ -125,12 +125,24 @@ pipeline {
             mail to: 'natanahelatankeu@gmail.com',
             subject: 'Integration Tests Successful',
             body: 'Integration tests have completed successfully.'
+            smtpServer: 'smtp.gmail.com',
+            smtpPort: '465',
+            smtpAuth: 'true',
+            smtpUsername: 'natanahelatankeu@gmail.com',
+            smtpPassword: 'Atan#2005',
+            smtpUseSSL: 'true'
         }
         failure {
             echo 'Integration tests failed!'
             mail to: 'natanahelatankeu@gmail.com',
             subject: 'Integration Tests Failed',
             body: 'Integration tests have failed. Please check the logs for more information.'
+            smtpServer: 'smtp.gmail.com',
+            smtpPort: '465',
+            smtpAuth: 'true',
+            smtpUsername: 'natanahelatankeu@gmail.com',
+            smtpPassword: 'Atan#2005',
+            smtpUseSSL: 'true'
         }
         cleanup {
             cleanWs()
