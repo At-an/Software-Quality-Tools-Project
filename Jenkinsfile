@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        git "2.43.0"
+        git "Git 2.43.0"
     }
     
     environment {
