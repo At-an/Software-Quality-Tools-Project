@@ -63,9 +63,11 @@ pipeline {
         stage('Code Quality Check') {
             steps {
                 script {
+                    dir('C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\Integration_test'){
                     bat """
                         ${PYTHON_EXE} -m flake8 . --max-line-length=120
                     """
+                    }
                 }
             }
         }
