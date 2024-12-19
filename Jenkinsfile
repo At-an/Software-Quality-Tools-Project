@@ -98,7 +98,7 @@ pipeline {
     
     post {
         always {
-            junit 'test-results/junit.xml'
+            junit '**/TEST-*.xml'
             recordIssues enabledForFailure: true, tool: flake8()
             publishCoverage adapters: [coberturaAdapter('coverage-reports/coverage.xml')]
             publishHTML([
