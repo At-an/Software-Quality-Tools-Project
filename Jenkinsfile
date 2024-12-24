@@ -131,7 +131,7 @@ pipeline {
                  smtpServer: 'smtp.gmail.com',
                  smtpPort: 465,
                  useSsl: true,
-                 credentialsId: 'Atan#2005'
+                 credentialsId: 'c0dc4101-962f-4253-a206-5d48fafa8044'
         }
         failure {
             echo 'Integration tests failed!'
@@ -142,7 +142,7 @@ pipeline {
                  smtpServer: 'smtp.gmail.com',
                  smtpPort: 465,
                  useSsl: true,
-                 credentialsId: 'Atan#2005'
+                 credentialsId: 'c0dc4101-962f-4253-a206-5d48fafa8044'
         }
         cleanup {
             cleanWs()
