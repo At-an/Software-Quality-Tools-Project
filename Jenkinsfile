@@ -2,26 +2,29 @@ pipeline {
     agent any
 
     tools {
-        git "Git(Default)"
+        git 'Git(Default)'
     }
-    
+
     environment {
-        PYTHON_VERSION = "3.12.5"
-        PYTHON_EXE = "C:\\Users\\ANGE\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
+        PYTHON_VERSION = '3.12.5'
+        PYTHON_EXE = 'C:\\Users\\ANGE\\AppData\\Local\\Programs\\Python\\Python312\\python.exe'
     }
-    
+
     stages {
         stage('Checkout') {
             steps {
                 checkout([
-                    $class: 'GitSCM', 
-                    branches: [[name: '*/main']], 
-                    extensions: [[$class: 'CleanCheckout']], 
-                    userRemoteConfigs: [[credentialsId: 'ange', url: 'https://github.com/At-an/Software-Quality-Tools-Project.git']]
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    extensions: [[$class: 'CleanCheckout']],
+                    userRemoteConfigs: [[
+                        credentialsId: 'ange',
+                        url: 'https://github.com/At-an/Software-Quality-Tools-Project.git'
+                    ]]
                 ])
             }
         }
-        
+
         stage('Install Dependencies') {
             steps {
                 script {
@@ -59,19 +62,19 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Code Quality Check') {
             steps {
                 script {
-                    dir('C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\Integration_test'){
-                    bat """
-                        ${PYTHON_EXE} -m flake8 . --max-line-length=120
-                    """
+                    dir('C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\Integration_test') {
+                        bat """
+                            ${PYTHON_EXE} -m flake8 . --max-line-length=120
+                        """
                     }
                 }
             }
         }
-        
+
         stage('Run Integration Tests') {
             steps {
                 script {
@@ -91,7 +94,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Generate Requirements') {
             steps {
                 script {
@@ -102,12 +105,12 @@ pipeline {
             }
         }
     }
-    
+
     post {
         always {
             bat 'powershell -Command "Get-ChildItem -Path . -Filter TEST-*.xml -Recurse | Format-Table"'
-            junit '**/test-results/*.xml'
-            recordIssues enabledForFailure: true, tool: flake8()
+            junit 'test-results/*.xml'
+            recordIssues enabledForFailure: true, tools: [flake8()]
             publishCoverage adapters: [coberturaAdapter('coverage-reports/coverage.xml')]
             publishHTML([
                 allowMissing: false,
@@ -115,34 +118,33 @@ pipeline {
                 keepAll: true,
                 reportDir: 'coverage-reports/html',
                 reportFiles: 'index.html',
-                reportName: 'Coverage Report',
-                reportTitles: ''
+                reportName: 'Coverage Report'
             ])
         }
         success {
             echo 'Integration tests completed successfully!'
             archiveArtifacts artifacts: 'requirements.txt', fingerprint: true
             mail to: 'natanahelatankeu@gmail.com',
-            subject: 'Integration Tests Successful',
-            body: 'Integration tests have completed successfully.'
-            smtpServer: 'smtp.gmail.com',
-            smtpPort: '465',
-            smtpAuth: 'true',
-            smtpUsername: 'natanahelatankeu@gmail.com',
-            smtpPassword: 'Atan#2005',
-            smtpUseSSL: 'true'
+                 subject: 'Integration Tests Successful',
+                 body: 'Integration tests have completed successfully.',
+                 smtpServer: 'smtp.gmail.com',
+                 smtpPort: '465',
+                 smtpAuth: true,
+                 smtpUsername: 'natanahelatankeu@gmail.com',
+                 smtpPassword: 'Atan#2005',
+                 smtpUseSSL: true
         }
         failure {
             echo 'Integration tests failed!'
             mail to: 'natanahelatankeu@gmail.com',
-            subject: 'Integration Tests Failed',
-            body: 'Integration tests have failed. Please check the logs for more information.'
-            smtpServer: 'smtp.gmail.com',
-            smtpPort: '465',
-            smtpAuth: 'true',
-            smtpUsername: 'natanahelatankeu@gmail.com',
-            smtpPassword: 'Atan#2005',
-            smtpUseSSL: 'true'
+                 subject: 'Integration Tests Failed',
+                 body: 'Integration tests have failed. Please check the logs for more information.',
+                 smtpServer: 'smtp.gmail.com',
+                 smtpPort: '465',
+                 smtpAuth: true,
+                 smtpUsername: 'natanahelatankeu@gmail.com',
+                 smtpPassword: 'Atan#2005',
+                 smtpUseSSL: true
         }
         cleanup {
             cleanWs()
