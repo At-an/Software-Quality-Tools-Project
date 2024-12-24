@@ -132,7 +132,7 @@ pipeline {
                  auth: true,
                  username: 'DESKTOP-AV1D9BH@local',
                  password: 'Atan#2005',
-                 ssL: true
+                 ssl: true
         }
         failure {
             echo 'Integration tests failed!'
@@ -144,7 +144,7 @@ pipeline {
                  auth: true,
                  username: 'DESKTOP-AV1D9BH@local',
                  password: 'Atan#2005',
-                 ssL: true
+                 ssl: true
         }
         cleanup {
             cleanWs()
