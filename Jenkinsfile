@@ -123,26 +123,9 @@ pipeline {
         }
         success {
             echo 'Integration tests completed successfully!'
-            archiveArtifacts artifacts: 'requirements.txt', fingerprint: true
-            mail to: 'natanahelatankeu@gmail.com',
-                 subject: 'Integration Tests Successful',
-                 body: 'Integration tests have completed successfully.',
-                 from: 'DESKTOP-AV1D9BH@local',
-                 smtpServer: 'smtp.gmail.com',
-                 smtpPort: 465,
-                 useSsl: true,
-                 credentialsId: 'c0dc4101-962f-4253-a206-5d48fafa8044'
         }
         failure {
             echo 'Integration tests failed!'
-            mail to: 'natanahelatankeu@gmail.com',
-                 subject: 'Integration Tests Failed',
-                 body: 'Integration tests have failed. Please check the logs for more information.',
-                 from: 'DESKTOP-AV1D9BH@local',
-                 smtpServer: 'smtp.gmail.com',
-                 smtpPort: 465,
-                 useSsl: true,
-                 credentialsId: 'c0dc4101-962f-4253-a206-5d48fafa8044'
         }
         cleanup {
             cleanWs()
