@@ -110,4 +110,5 @@ If you'd like to contribute to this project:
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License and the present contributors of this project include the 
+members of GROUP2.
