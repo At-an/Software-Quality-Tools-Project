@@ -92,8 +92,9 @@ pipeline {
         always {
             bat 'powershell -Command "Get-ChildItem -Path . -Filter TEST-*.xml -Recurse | Format-Table"'
             junit 'test-results/*.xml'
+            recordIssues enabledForFailure: true, tools: [flake8()]
             publishCoverage adapters: [
-                // Add specific coverage tools here if needed
+               coberturaAdapter('coverage-reports/coverage.xml') 
             ]
             publishHTML([
                 allowMissing: false,
