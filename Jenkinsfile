@@ -1,63 +1,31 @@
+Here's the updated pipeline:
+Pipeline Script
+Groovy
 pipeline {
     agent any
 
-    tools {
-        git 'Git(Default)'
-    }
-
     environment {
-        PYTHON_VERSION = '3.12.5'
-        PYTHON_EXE = 'C:\\Users\\ANGE\\AppData\\Local\\Programs\\Python\\Python312\\python.exe'
+        IMAGE_NAME = "flask-app-image"
+        CONTAINER_NAME = "flask-app-container"
+        VERSION = "1.0.${env.BUILD_ID}"
+        SSH_KEY_CREDENTIALS = "46d73930-675a-40eb-990d-f3039c8b0bf6"
+        REGISTRY_URL = "docker.io/atan04/flask-app-image"
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: '*/main']],
-                    extensions: [[$class: 'CleanCheckout']],
-                    userRemoteConfigs: [[
-                        credentialsId: 'ange',
-                        url: 'https://github.com/At-an/Software-Quality-Tools-Project.git'
-                    ]]
-                ])
+        stage('Build') {
+            agent {
+                docker { image 'docker:stable' }
             }
-        }
-
-        stage('Install Dependencies') {
             steps {
                 script {
+                    echo "Building Docker image..."
                     bat """
-                        ${PYTHON_EXE} -m pip install --user ^
-                            bcrypt==4.2.1 ^
-                            blinker==1.9.0 ^
-                            click==8.1.7 ^
-                            coverage==7.6.8 ^
-                            dnspython==2.7.0 ^
-                            flake8==7.1.1 ^
-                            Flask==3.1.0 ^
-                            Flask-Bcrypt==1.0.1 ^
-                            Flask-Login==0.6.3 ^
-                            Flask-PyMongo==2.3.0 ^
-                            Flask-SQLAlchemy==3.1.1 ^
-                            greenlet==3.1.1 ^
-                            iniconfig==2.0.0 ^
-                            itsdangerous==2.2.0 ^
-                            Jinja2==3.1.4 ^
-                            MarkupSafe==3.0.2 ^
-                            mccabe==0.7.0 ^
-                            packaging==24.2 ^
-                            pluggy==1.5.0 ^
-                            pycodestyle==2.12.1 ^
-                            pyflakes==3.2.0 ^
-                            pymongo==4.10.1 ^
-                            pytest==8.3.4 ^
-                            pytest-cov==6.0.0 ^
-                            python-dotenv==1.0.1 ^
-                            SQLAlchemy==2.0.36 ^
-                            typing_extensions==4.12.2 ^
-                            Werkzeug==3.1.3
+                        docker build -t ${IMAGE_NAME}:${VERSION}.
+                        docker tag ${IMAGE_NAME}:${VERSION} ${REGISTRY_URL}/${IMAGE_NAME}:latest
+                        echo "Pushing Docker image to registry..."
+                        docker push ${REGISTRY_URL}/${IMAGE_NAME}:latest
+                        docker push ${IMAGE_NAME}:${VERSION}
                     """
                 }
             }
@@ -68,7 +36,7 @@ pipeline {
                 script {
                     dir('C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\Integration_test') {
                         bat """
-                            ${PYTHON_EXE} -m flake8 . --max-line-length=120
+                            ${PYTHON_EXE} -m flake8. --max-line-length=120
                         """
                     }
                 }
@@ -95,23 +63,40 @@ pipeline {
             }
         }
 
-        stage('Generate Requirements') {
+        stage('Deploy') {
             steps {
-                script {
-                    bat """
-                        ${PYTHON_EXE} -m pip freeze > requirements.txt
-                    """
+                sshagent() {
+                    script {
+                        echo "Deploying to server..."
+                        bat """
+                            ssh -o StrictHostKeyChecking=no user@your-server-ip ^
+                              "docker pull ${REGISTRY_URL}/${IMAGE_NAME}:latest && ^
+                               docker stop ${CONTAINER_NAME} || true && ^
+                               docker rm ${CONTAINER_NAME} || true && ^
+                               docker run -d -p 8080:5000 --name ${CONTAINER_NAME} ${REGISTRY_URL}/${IMAGE_NAME}:latest"
+                        """
+                    }
                 }
             }
         }
     }
 
     post {
+        failure {
+            script {
+                echo "Deployment failed. Rolling back..."
+                bat """
+                    ssh -o StrictHostKeyChecking=no user@your-server-ip ^
+                      "docker stop ${CONTAINER_NAME} && ^
+                       docker rm ${CONTAINER_NAME}"
+                """
+            }
+        }
         always {
-            bat 'powershell -Command "Get-ChildItem -Path . -Filter TEST-*.xml -Recurse | Format-Table"'
+            bat 'powershell -Command "Get-ChildItem -Path. -Filter TEST-*.xml -Recurse | Format-Table"'
             junit 'test-results/*.xml'
-            recordIssues enabledForFailure: true, tools: [flake8()]
-            publishCoverage adapters: [coberturaAdapter('coverage-reports/coverage.xml')]
+            recordIssues enabledForFailure: true, tools: 
+            publishCoverage adapters: 
             publishHTML([
                 allowMissing: false,
                 alwaysLinkToLastBuild: true,
@@ -122,10 +107,7 @@ pipeline {
             ])
         }
         success {
-            echo 'Integration tests completed successfully!'
-        }
-        failure {
-            echo 'Integration tests failed!'
+            echo 'Deployment completed successfully!'
         }
         cleanup {
             cleanWs()
