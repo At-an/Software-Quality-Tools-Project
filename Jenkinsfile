@@ -1,15 +1,12 @@
-Here's the updated pipeline:
-Pipeline Script
-Groovy
 pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "flask-app-image"
-        CONTAINER_NAME = "flask-app-container"
-        VERSION = "1.0.${env.BUILD_ID}"
-        SSH_KEY_CREDENTIALS = "46d73930-675a-40eb-990d-f3039c8b0bf6"
-        REGISTRY_URL = "docker.io/atan04/flask-app-image"
+        IMAGE_NAME            = "flask-app-image"
+        CONTAINER_NAME        = "flask-app-container"
+        VERSION               = "1.0.${env.BUILD_ID}"
+        SSH_KEY_CREDENTIALS   = "46d73930-675a-40eb-990d-f3039c8b0bf6"
+        REGISTRY_URL          = "docker.io/atan04/flask-app-image"
     }
 
     stages {
@@ -21,7 +18,7 @@ pipeline {
                 script {
                     echo "Building Docker image..."
                     bat """
-                        docker build -t ${IMAGE_NAME}:${VERSION}.
+                        docker build -t ${IMAGE_NAME}:${VERSION} .
                         docker tag ${IMAGE_NAME}:${VERSION} ${REGISTRY_URL}/${IMAGE_NAME}:latest
                         echo "Pushing Docker image to registry..."
                         docker push ${REGISTRY_URL}/${IMAGE_NAME}:latest
@@ -36,7 +33,7 @@ pipeline {
                 script {
                     dir('C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\Integration_test') {
                         bat """
-                            ${PYTHON_EXE} -m flake8. --max-line-length=120
+                            ${PYTHON_EXE} -m flake8 --max-line-length=120
                         """
                     }
                 }
@@ -65,7 +62,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sshagent() {
+                sshagent([SSH_KEY_CREDENTIALS]) { // Specify the credentials ID here
                     script {
                         echo "Deploying to server..."
                         bat """
@@ -93,10 +90,11 @@ pipeline {
             }
         }
         always {
-            bat 'powershell -Command "Get-ChildItem -Path. -Filter TEST-*.xml -Recurse | Format-Table"'
+            bat 'powershell -Command "Get-ChildItem -Path . -Filter TEST-*.xml -Recurse | Format-Table"'
             junit 'test-results/*.xml'
-            recordIssues enabledForFailure: true, tools: 
-            publishCoverage adapters: 
+            publishCoverage adapters: [
+                // Add specific coverage tools here if needed
+            ]
             publishHTML([
                 allowMissing: false,
                 alwaysLinkToLastBuild: true,
