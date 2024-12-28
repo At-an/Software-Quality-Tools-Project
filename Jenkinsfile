@@ -6,8 +6,6 @@ pipeline {
     }
 
     environment {
-        DOCKER_USERNAME       = "atan04" // Docker Hub username
-        DOCKER_PASSWORD       = credentials('ab2b0a39-0167-4955-bdc1-1a98fbfb34a4') // Docker Hub password
         IMAGE_NAME            = "flask-app-image"
         CONTAINER_NAME        = "flask-app-container"
         VERSION               = "1.0.${env.BUILD_ID}"
@@ -32,17 +30,20 @@ pipeline {
             }
         }
 
+        
         stage('Build') {
             steps {
                 script {
                     echo "Building Docker image..."
-                    bat """
-                        echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
-                        docker build -t ${IMAGE_NAME}:${VERSION} .
-                        docker tag ${IMAGE_NAME}:${VERSION} ${REGISTRY_URL}:${VERSION}
-                        echo "Pushing Docker image to registry..."
-                        docker push ${REGISTRY_URL}:${VERSION}
-                    """
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        bat """
+                            echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
+                            docker build -t ${IMAGE_NAME}:${VERSION} .
+                            docker tag ${IMAGE_NAME}:${VERSION} ${REGISTRY_URL}:${VERSION}
+                            echo "Pushing Docker image to registry..."
+                            docker push ${REGISTRY_URL}:${VERSION}
+                        """
+                    }
                 }
             }
         }
