@@ -9,7 +9,7 @@ pipeline {
         IMAGE_NAME            = "flask-app-image"
         CONTAINER_NAME        = "flask-app-container"
         VERSION               = "1.0.${env.BUILD_ID}"
-        REGISTRY_URL          = "docker.io/atan04/flask-app-image"
+        REGISTRY_URL          = "atan04/flask-app-image"
         SSH_KEY_CREDENTIALS   = credentials('46d73930-675a-40eb-990d-f3039c8b0bf6')
         PYTHON_VERSION        = "python3.12.5" // Specify Python version
         PYTHON_EXE           = 'C:\\Users\\ANGE\\AppData\\Local\\Programs\\Python\\Python312\\python.exe' //Added python exe path
