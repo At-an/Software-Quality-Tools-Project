@@ -1,7 +1,7 @@
 pipeline {
     agent any
 
-      tools {
+    tools {
         git 'Git(Default)'
     }
 
@@ -13,11 +13,11 @@ pipeline {
         VERSION               = "1.0.${env.BUILD_ID}"
         REGISTRY_URL          = "docker.io/atan04/flask-app-image"
         SSH_KEY_CREDENTIALS   = credentials('46d73930-675a-40eb-990d-f3039c8b0bf6')
-        PYTHON_VERSION           = "python3.12.5" // Specify Python version
-        PYTHON_EXE = 'C:\\Users\\ANGE\\AppData\\Local\\Programs\\Python\\Python312\\python.exe' //Added python exe path
+        PYTHON_VERSION        = "python3.12.5" // Specify Python version
+        PYTHON_EXE           = 'C:\\Users\\ANGE\\AppData\\Local\\Programs\\Python\\Python312\\python.exe' //Added python exe path
     }
 
-   stages { //added checkout stage
+    stages {
         stage('Checkout') {
             steps {
                 checkout([
@@ -30,9 +30,8 @@ pipeline {
                     ]]
                 ])
             }
-      }
+        }
 
-    stages {
         stage('Build') {
             steps {
                 script {
@@ -64,11 +63,11 @@ pipeline {
             steps {
                 script {
                     bat """
-                        REM Create directories for test results , this line was added now
+                        REM Create directories for test results
                         mkdir test-results
                         mkdir coverage-reports
 
-                        REM Run tests with coverage , this line was added now
+                        REM Run tests with coverage
                         ${PYTHON_EXE} -m pytest tests\\ ^
                             --verbose ^
                             --junitxml=test-results\\junit.xml ^
