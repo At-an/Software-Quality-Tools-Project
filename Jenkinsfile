@@ -30,24 +30,24 @@ pipeline {
             }
         }
 
-        
-        stage('Build') {
-            steps {
-                script {
-                    echo "Building Docker image..."
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        bat """
-                            echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
-                            docker build -t ${IMAGE_NAME}:${VERSION} .
-                            docker tag ${IMAGE_NAME}:${VERSION} ${REGISTRY_URL}:${VERSION}
-                            echo "Pushing Docker image to registry..."
-                            docker push ${REGISTRY_URL}:${VERSION}
-                        """
-                    }
-                }
+    stage('Build Docker Image') {
+         steps {
+             script {
+                echo "Building Docker image..."
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                   bat """
+                       echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin
+                       docker build -t ${IMAGE_NAME}:${VERSION} .
+                       docker tag ${IMAGE_NAME}:${VERSION} ${REGISTRY_URL}:${VERSION}
+                       echo "Pushing Docker image to registry..."
+                      docker push ${REGISTRY_URL}:${VERSION}
+                   """
             }
         }
+    }
+}
 
+       
         stage('Code Quality Check') {
             steps {
                 script {
