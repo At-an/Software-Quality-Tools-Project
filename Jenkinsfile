@@ -1,16 +1,36 @@
 pipeline {
     agent any
 
+      tools {
+        git 'Git(Default)'
+    }
+
     environment {
+        DOCKER_USERNAME       = "atan04" // Docker Hub username
+        DOCKER_PASSWORD       = credentials('ab2b0a39-0167-4955-bdc1-1a98fbfb34a4') // Docker Hub password
         IMAGE_NAME            = "flask-app-image"
         CONTAINER_NAME        = "flask-app-container"
         VERSION               = "1.0.${env.BUILD_ID}"
-        SSH_KEY_CREDENTIALS   = credentials('46d73930-675a-40eb-990d-f3039c8b0bf6')
         REGISTRY_URL          = "docker.io/atan04/flask-app-image"
-        PYTHON_EXE           = "python3.12.5" // Specify Python version
-        DOCKER_USERNAME       = "natanahel atankeu" // Docker Hub username
-        DOCKER_PASSWORD       = credentials('ab2b0a39-0167-4955-bdc1-1a98fbfb34a4') // Docker Hub password
+        SSH_KEY_CREDENTIALS   = credentials('46d73930-675a-40eb-990d-f3039c8b0bf6')
+        PYTHON_VERSION           = "python3.12.5" // Specify Python version
+        PYTHON_EXE = 'C:\\Users\\ANGE\\AppData\\Local\\Programs\\Python\\Python312\\python.exe' //Added python exe path
     }
+
+   stages { //added checkout stage
+        stage('Checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    extensions: [[$class: 'CleanCheckout']],
+                    userRemoteConfigs: [[
+                        credentialsId: 'ange',
+                        url: 'https://github.com/At-an/Software-Quality-Tools-Project.git'
+                    ]]
+                ])
+            }
+      }
 
     stages {
         stage('Build') {
@@ -18,7 +38,7 @@ pipeline {
                 script {
                     echo "Building Docker image..."
                     bat """
-                        docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+                        echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
                         docker build -t ${IMAGE_NAME}:${VERSION} .
                         docker tag ${IMAGE_NAME}:${VERSION} ${REGISTRY_URL}:${VERSION}
                         echo "Pushing Docker image to registry..."
@@ -44,9 +64,11 @@ pipeline {
             steps {
                 script {
                     bat """
+                        REM Create directories for test results , this line was added now
                         mkdir test-results
                         mkdir coverage-reports
-                        
+
+                        REM Run tests with coverage , this line was added now
                         ${PYTHON_EXE} -m pytest tests\\ ^
                             --verbose ^
                             --junitxml=test-results\\junit.xml ^
