@@ -5,24 +5,24 @@ pipeline {
         IMAGE_NAME            = "flask-app-image"
         CONTAINER_NAME        = "flask-app-container"
         VERSION               = "1.0.${env.BUILD_ID}"
-        SSH_KEY_CREDENTIALS   = "46d73930-675a-40eb-990d-f3039c8b0bf6"
+        SSH_KEY_CREDENTIALS   = credentials('46d73930-675a-40eb-990d-f3039c8b0bf6')
         REGISTRY_URL          = "docker.io/atan04/flask-app-image"
+        PYTHON_EXE           = "python3.12.5" // Specify Python version
+        DOCKER_USERNAME       = "natanahel atankeu" // Docker Hub username
+        DOCKER_PASSWORD       = credentials('ab2b0a39-0167-4955-bdc1-1a98fbfb34a4') // Docker Hub password
     }
 
     stages {
         stage('Build') {
-            agent {
-                docker { image 'docker:stable' }
-            }
             steps {
                 script {
                     echo "Building Docker image..."
                     bat """
+                        docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
                         docker build -t ${IMAGE_NAME}:${VERSION} .
-                        docker tag ${IMAGE_NAME}:${VERSION} ${REGISTRY_URL}/${IMAGE_NAME}:latest
+                        docker tag ${IMAGE_NAME}:${VERSION} ${REGISTRY_URL}:${VERSION}
                         echo "Pushing Docker image to registry..."
-                        docker push ${REGISTRY_URL}/${IMAGE_NAME}:latest
-                        docker push ${IMAGE_NAME}:${VERSION}
+                        docker push ${REGISTRY_URL}:${VERSION}
                     """
                 }
             }
@@ -44,11 +44,9 @@ pipeline {
             steps {
                 script {
                     bat """
-                        REM Create directories for test results
                         mkdir test-results
                         mkdir coverage-reports
                         
-                        REM Run tests with coverage
                         ${PYTHON_EXE} -m pytest tests\\ ^
                             --verbose ^
                             --junitxml=test-results\\junit.xml ^
@@ -62,15 +60,15 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sshagent([SSH_KEY_CREDENTIALS]) { // Specify the credentials ID here
+                sshagent([SSH_KEY_CREDENTIALS]) {
                     script {
                         echo "Deploying to server..."
                         bat """
                             ssh -o StrictHostKeyChecking=no user@your-server-ip ^
-                              "docker pull ${REGISTRY_URL}/${IMAGE_NAME}:latest && ^
+                              "docker pull ${REGISTRY_URL}:${VERSION} && ^
                                docker stop ${CONTAINER_NAME} || true && ^
                                docker rm ${CONTAINER_NAME} || true && ^
-                               docker run -d -p 8080:5000 --name ${CONTAINER_NAME} ${REGISTRY_URL}/${IMAGE_NAME}:latest"
+                               docker run -d -p 8080:5000 --name ${CONTAINER_NAME} ${REGISTRY_URL}:${VERSION}"
                         """
                     }
                 }
