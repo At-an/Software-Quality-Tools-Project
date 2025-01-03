@@ -1,6 +1,5 @@
-pipeline {
-    agent any
-
+pipeline { 
+    agent any 
     tools {
         git 'Git(Default)'
     }
